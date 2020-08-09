@@ -1,12 +1,5 @@
-from datetime import datetime, timedelta
-from rentals_united_api import get_beyond_prices, get_beyond_id_from_prop, rentals_united, get_availability_calendar, get_ru_beyond_copy
-import pymysql
-import math
 import numpy as np
-import json
-import boto3
-import os
-
+import math
 
 # parameters
 # max look ahead
@@ -15,6 +8,10 @@ max_t = 180
 c_x = 150
 # variable cost of reservation
 c_v = 10
+# minium price
+min_price = 50
+# max_price
+max_price = 500
 
 time_horizon = np.arange(0, max_t, 1)
 X = [(t_1, t_2)
@@ -43,8 +40,8 @@ def get_cost(x, c_x, c_v):
 
 
 def get_steepness(los, time_from_now):
-    """given los and time from now, it returns the steepness of 
-    the logistic function for probability given price 
+    """given los and time from now, it returns the steepness of
+    the logistic function for probability given price
     """
     # placeholder
     return 0.04
@@ -58,8 +55,17 @@ def get_midpoint(los, time_from_now):
     return 150
 
 
-def probability_given_price(x, q):
-    """given a reservation and price, returns probability of getting booked
+def probability_given_price(q, k, m):
+    """given a price, and logistic
+    function parameters- returns probability of getting booked
+    """
+    # logistic function
+    prob = 1/(1+math.exp(k*(q-m)))
+    return prob
+
+
+def iso_price(x):
+    """ get best price for reservation, in isolation
     """
     los = x[1]-x[0]
     time_from_now = x[0]
@@ -68,7 +74,10 @@ def probability_given_price(x, q):
     k = get_steepness(los, time_from_now)
 
     # inflection
-    midpoint = get_midpoint(los, time_from_now)
+    m = get_midpoint(los, time_from_now)
 
-    # logistic function
-    prob = 1/(1+math.exp(k*(q-midpoint)))
+    Q = list(range(min_price, max_price))
+
+    iso_price = max([(probability_given_price(q, k, m)*q) for q in Q])
+
+    return iso_price
