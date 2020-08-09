@@ -12,10 +12,13 @@ c_v = 10
 min_price = 50
 # max_price
 max_price = 500
+# max length of stay
+max_los = 30
 
-time_horizon = np.arange(0, max_t, 1)
+time_horizon = list(range(0, max_t))
+# possible stays
 X = [(t_1, t_2)
-     for t_1 in time_horizon for t_2 in time_horizon if t_2 > t_1 and t_2-t_1 <= 30]
+     for t_1 in time_horizon for t_2 in time_horizon if t_2 > t_1 and t_2-t_1 <= max_los]
 
 
 def get_collisions(x, X):
@@ -72,12 +75,8 @@ def iso_price(x):
     # get parameters of logistic function
     # steepness
     k = get_steepness(los, time_from_now)
-
     # inflection
     m = get_midpoint(los, time_from_now)
-
     Q = list(range(min_price, max_price))
-
     iso_price = max([(probability_given_price(q, k, m)*q) for q in Q])
-
     return iso_price
