@@ -67,7 +67,7 @@ def probability_given_price(q, k, m):
     return prob
 
 
-def iso_price(x):
+def iso_prob(x):
     """ get best price for reservation, in isolation
     """
     los = x[1]-x[0]
@@ -78,5 +78,30 @@ def iso_price(x):
     # inflection
     m = get_midpoint(los, time_from_now)
     Q = list(range(min_price, max_price))
-    iso_price = max([(probability_given_price(q, k, m)*q) for q in Q])
-    return iso_price
+    P = np.array([probability_given_price(q, k, m) for q in Q])
+    values = [q*p for q, p in zip(Q, P)]
+    m = max(values)
+    probs_at_max_idx = [i for i, j in enumerate(values) if j == m]
+
+    probs_at_max = P[probs_at_max_idx]
+
+    return probs_at_max[0]
+
+
+def prob_xi(x, X, checked):
+    """
+    calculate probability of x_i 
+    being first (booked before it's collisions)
+    """
+    checked.append(x)
+    x_c = get_collisions(x, X)
+    x_c = [i for i in x_c if i not in checked]
+
+    checked.append(x_c)
+
+    prob = iso_prob(x)
+    if len(x_c) == 0:
+        print(prob)
+        return prob
+    else:
+        return prob/(sum([prob_xi(i, X, checked) for i in x_c])+prob)
