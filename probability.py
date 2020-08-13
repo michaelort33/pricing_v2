@@ -6,7 +6,7 @@ Created on Thu Aug 13 14:23:38 2020
 """
 import numpy as np
 import networkx as nx
-from itertools import product, permutations
+from itertools import product, permutations, combinations
 
 #%% Define functions
 def draw_graph(G):
@@ -29,11 +29,10 @@ def disburse_mass(G, m):
     return G
  
 #%% Setup the problem: Define probabilities and constraints
-gap_size = 5
+gap_size = 3
 X = [(a,b) for a,b in permutations(range(gap_size+1), 2) if a<b]
 p = np.ones(len(X)) * 0.75
-c = [(i, i+j+1) for i,x1 in enumerate(X) for j,x2 in enumerate(X[i+1:]) if collides(x1,x2)]
-
+c = [(x1[0], x2[0]) for x1, x2 in combinations(enumerate(X),2) if collides(x1[1],x2[1])]
 
 
 #%% Calculate probability mass for every outcome (disregard constraints)
