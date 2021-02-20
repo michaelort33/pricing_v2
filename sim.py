@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 """
 Created on Tue Aug 18 19:45:08 2020
 
@@ -22,8 +23,8 @@ def res_len(x):
 
 
 # %% Define the problem
-t = 30   # Number of days
-max_stay = 30
+t = 6   # Number of days
+max_stay = 6
 
 
 def p(q, x):
@@ -62,5 +63,10 @@ Elos = np.mean([np.mean(res_len(np.array(X)[x]))
                 if np.any(x) else 0 for x in req])
 
 # %% Display as a graph
-# G = nx.Graph(A)
-# nx.draw(G, pos=list(zip(np.array(X).mean(1), np.sum(np.array(X)*[-1,1], 1)**2)))
+G = nx.Graph(A)
+mapping = {i: str(X[i]) for i in G.nodes}
+G = nx.relabel_nodes(G, mapping, copy=False)
+pos = nx.kamada_kawai_layout(G)
+nx.draw(G, pos=list(zip(np.array(X).mean(1),
+                        np.sum(np.array(X)*[-1, 1], 1)**2)), with_labels=True)
+# %%
